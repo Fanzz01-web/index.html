@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechLux Store — Jam Tangan & Laptop Premium</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav>
+  <div class="nav-logo" onclick="scrollTop()">TECHLUX</div>
+  <div class="nav-links">
+    <a onclick="showPage('shop')" class="active" id="nav-shop">Toko</a>
+    <a onclick="showPage('history')" id="nav-history">Riwayat Pesanan</a>
+    <a onclick="showPage('contact')" id="nav-contact">Kontak</a>
+  </div>
+  <div class="nav-right">
+    <button class="cart-btn" onclick="toggleCart()">
+      🛒 Keranjang <span class="badge" id="cart-count">0</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toast-msg">Produk ditambahkan ke keranjang!</span>
+</div>
+
+<!-- ===== OVERLAY ===== -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- ===== SIDE CART PANEL ===== -->
+<div class="side-panel" id="cart-panel">
+  <div class="panel-header">
+    <h3>🛒 Keranjang Belanja</h3>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="panel-body" id="cart-body"></div>
+  <div class="panel-footer" id="cart-footer"></div>
+</div>
+
+<!-- ===== MODAL CHECKOUT ===== -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;">
+      <h3 style="margin:0;">📦 Detail Pesanan</h3>
+      <button class="close-btn" onclick="closeModal('checkout-modal')">✕</button>
+    </div>
+    <div class="order-summary" id="checkout-summary"></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nama Lengkap</label>
+        <input type="text" id="cust-name" placeholder="Budi Santoso">
+      </div>
+      <div class="form-group">
+        <label>No. Handphone</label>
+        <input type="text" id="cust-phone" placeholder="08xxxxxxxxxx">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="cust-email" placeholder="email@contoh.com">
+    </div>
+    <div class="form-group">
+      <label>Alamat Pengiriman</label>
+      <textarea id="cust-address" placeholder="Jl. Contoh No. 12, Kota, Provinsi"></textarea>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Metode Pembayaran</label>
+        <select id="payment-method">
+          <option value="">Pilih Metode</option>
+          <option>Transfer Bank (BCA)</option>
+          <option>Transfer Bank (Mandiri)</option>
+          <option>GoPay</option>
+          <option>OVO</option>
+          <option>Dana</option>
+          <option>QRIS</option>
+          <option>COD</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Ekspedisi</label>
+        <select id="shipping-method">
+          <option>JNE Reguler</option>
+          <option>JNE Express</option>
+          <option>J&T Express</option>
+          <option>SiCepat</option>
+          <option>AnterAja</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Catatan Pesanan (opsional)</label>
+      <textarea id="order-note" placeholder="Catatan khusus..."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('checkout-modal')">Batal</button>
+      <button class="btn-primary" onclick="placeOrder()">✓ Konfirmasi Pesanan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL SUKSES ===== -->
+<div class="modal-overlay" id="success-modal">
+  <div class="modal" style="max-width:420px;">
+    <div class="success-modal">
+      <div class="success-icon">🎉</div>
+      <h3>Pesanan Berhasil!</h3>
+      <p>Terima kasih atas pembelian Anda. Pesanan sedang kami proses dan akan segera dikirimkan.</p>
+      <p id="success-order-id" style="color:var(--gold);font-weight:600;font-size:16px;margin-bottom:1.5rem;"></p>
+      <button class="btn-primary" style="width:100%"
+        onclick="closeModal('success-modal');showPage('history')">Lihat Riwayat Pesanan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL DETAIL ===== -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal detail-modal" id="detail-modal-content"></div>
+</div>
+
+<!-- ===== KONTEN UTAMA ===== -->
+<main>
+
+  <!-- HALAMAN TOKO -->
+  <div class="page active" id="page-shop">
+    <div class="hero">
+      <div class="hero-badge">Premium Collection 2025</div>
+      <h1>Teknologi &amp; <span>Kemewahan</span><br>Dalam Satu Tempat</h1>
+      <p>Temukan koleksi jam tangan mewah dan laptop premium terbaik pilihan para profesional modern.</p>
+      <div class="hero-cta">
+        <button class="btn-primary"
+          onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">
+          Belanja Sekarang
+        </button>
+        <button class="btn-outline" onclick="showPage('contact')">Hubungi Kami</button>
+      </div>
+    </div>
+
+    <div class="section" id="products">
+      <div class="section-header">
+        <div class="gold-line"></div>
+        <h2>Koleksi Produk</h2>
+        <p>Pilihan terbaik untuk gaya hidup modern Anda</p>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterProducts('all',this)">Semua</button>
+        <button class="filter-btn" onclick="filterProducts('watch',this)">⌚ Jam Tangan</button>
+        <button class="filter-btn" onclick="filterProducts('laptop',this)">💻 Laptop</button>
+      </div>
+      <div class="product-grid" id="product-grid"></div>
+    </div>
+  </div>
+
+  <!-- HALAMAN RIWAYAT -->
+  <div class="page" id="page-history">
+    <div class="section">
+      <div class="section-header">
+        <div class="gold-line"></div>
+        <h2>Riwayat Transaksi</h2>
+        <p>Klik pada baris pesanan untuk melihat detail lengkap</p>
+      </div>
+      <div id="history-content"></div>
+    </div>
+  </div>
+
+  <!-- HALAMAN KONTAK -->
+  <div class="page" id="page-contact">
+    <div class="section">
+      <div class="section-header">
+        <div class="gold-line"></div>
+        <h2>Hubungi Kami</h2>
+        <p>Kami siap membantu Anda 7 hari seminggu</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-card">
+          <div class="contact-icon">📍</div>
+          <h4>Alamat Toko</h4>
+          <p>Jl. Sudirman No. 88, Karawang<br>Jawa Barat, Indonesia 41311</p>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon">📞</div>
+          <h4>Telepon & WhatsApp</h4>
+          <p>
+            <a href="tel:+6221-5551234">+62 21-555-1234</a><br>
+            <a href="https://wa.me/6282295165860" target="_blank">+62 822-9516-5860 (WA)</a>
+          </p>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon">📧</div>
+          <h4>Email</h4>
+          <p>
+            <a href="mailto:cs@techlux.id">rafanfauzi27@gmail.com</a><br>
+            <a href="mailto:sales@techlux.id">rafanfauzi27@gmail.com</a>
+          </p>
+        </div>
+        <div class="contact-card">
+          <div class="contact-icon">🕐</div>
+          <h4>Jam Operasional</h4>
+          <p>Senin – Jumat: 09.00 – 18.00<br>Sabtu: 09.00 – 15.00<br>Minggu: Tutup</p>
+        </div>
+      </div>
+      <div class="contact-form-wrap">
+        <h3>Kirim Pesan</h3>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nama</label>
+            <input type="text" id="contact-name" placeholder="Nama Anda">
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="contact-email" placeholder="email@contoh.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Subjek</label>
+          <input type="text" id="contact-subject" placeholder="Pertanyaan produk, dll.">
+        </div>
+        <div class="form-group">
+          <label>Pesan</label>
+          <textarea id="contact-message" style="min-height:120px;" placeholder="Tulis pesan Anda..."></textarea>
+        </div>
+        <button class="btn-primary" onclick="sendContact()">📨 Kirim Pesan</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
