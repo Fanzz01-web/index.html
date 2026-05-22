@@ -24,7 +24,7 @@ const PRODUCTS = [
     id: 4, category: 'watch', brand: 'Casio', name: 'G-Shock GA-2100',
     desc: 'Jam tangan tangguh struktur karbon tipis tahan guncangan dan air 200m.',
     price: 1800000, tag: 'Populer', stars: '★★★★★', rating: 4.7,
-    img: 'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=600&q=80'
+    img: 'https://tse3.mm.bing.net/th/id/OIP.pY7yfQ5C7dnj-KPVy9c6zQHaFj?pid=Api&P=0&h=180'
   },
   {
     id: 5, category: 'laptop', brand: 'Apple', name: 'MacBook Pro 14" M3 Pro',
@@ -42,7 +42,7 @@ const PRODUCTS = [
     id: 7, category: 'laptop', brand: 'ASUS', name: 'ROG Zephyrus G16',
     desc: 'Gaming laptop premium dengan RTX 4080, layar QHD 240Hz dan desain ultra-slim.',
     price: 35000000, tag: 'Gaming', stars: '★★★★★', rating: 4.8,
-    img: 'https://images.unsplash.com/photo-1616084903985-1a00f7cce9b8?w=600&q=80'
+    img: 'https://www.dutchiee.tv/wp-content/uploads/2025/10/71I1KUBcNlL._AC_SL1500_.jpg'
   },
   {
     id: 8, category: 'laptop', brand: 'Lenovo', name: 'ThinkPad X1 Carbon',
