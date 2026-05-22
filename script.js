@@ -12,7 +12,7 @@ const PRODUCTS = [
     id: 2, category: 'watch', brand: 'Omega', name: 'Seamaster 300M',
     desc: 'Pilihan profesional dengan ketahanan air 300m dan helium escape valve.',
     price: 85000000, tag: 'NEW', stars: '★★★★★', rating: 4.8,
-    img: 'https://images.unsplash.com/photo-1639699007849-a2d4e2cbfe90?w=600&q=80'
+    img: 'https://images.squarespace-cdn.com/content/v1/59ed5acbd7bdce7cce158518/1661741820945-YAKNUOJEV8DFZ6O7MKB1/Omega+Seamaster+Diver+300M+Co-Axial+Black+42mm+210.30.42.20.01.001+-+2020+Watch+Vault+02.jpg'
   },
   {
     id: 3, category: 'watch', brand: 'Tag Heuer', name: 'Carrera Chronograph',
