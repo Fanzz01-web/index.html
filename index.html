@@ -181,22 +181,22 @@
         <div class="contact-card">
           <div class="contact-icon">📍</div>
           <h4>Alamat Toko</h4>
-          <p>Jl. Purnawarman No. 25, Sumur Bandung Kota Bandung<br>Jawa Barat 40117</p>
+          <p>JJl. Purnawarman No. 25, Sumur Bandung Kota Bandung<br>Jawa Barat 40117</p>
         </div>
         <div class="contact-card">
           <div class="contact-icon">📞</div>
           <h4>Telepon & WhatsApp</h4>
           <p>
             <a href="tel:+6221-5551234">+62 21-555-1234</a><br>
-            <a href="https://wa.me/6282295165860" target="_blank">+62 822-9516-5860 (WA)</a>
+            <a href="https://wa.me/6281234567890" target="_blank">+62 822-9516-5860 (WA)</a>
           </p>
         </div>
         <div class="contact-card">
           <div class="contact-icon">📧</div>
           <h4>Email</h4>
           <p>
-            <a href="mailto:cs@techlux.id">rafanfauzi27@gmail.com</a><br>
-            <a href="mailto:sales@techlux.id">rafanfauzi27@gmail.com</a>
+            <a href="mailto:cs@techlux.id">cs@techlux.id</a><br>
+            <a href="mailto:sales@techlux.id">sales@techlux.id</a>
           </p>
         </div>
         <div class="contact-card">
@@ -232,6 +232,13 @@
 
 </main>
 
-<script src="script.js"></script>
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:1rem">
+  <div style="width:40px;height:40px;border:3px solid rgba(201,168,76,.3);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite"></div>
+  <span id="loading-msg" style="color:var(--gold);font-size:14px;letter-spacing:1px">Memproses...</span>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<script type="module" src="script.js"></script>
 </body>
 </html>
