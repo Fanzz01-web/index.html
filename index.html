@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechLux Store — Jam Tangan & Laptop Premium</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .auth-tab { padding:10px 24px;border:none;background:transparent;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s; }
+    .auth-tab.active { color:var(--gold);border-bottom-color:var(--gold); }
+    .auth-wrap { max-width:420px;margin:4rem auto;padding:0 1rem; }
+    .auth-card { background:var(--dark2);border:1px solid rgba(201,168,76,.15);border-radius:16px;padding:2rem; }
+    .auth-logo { font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);text-align:center;margin-bottom:.5rem;letter-spacing:2px; }
+    .auth-sub { text-align:center;color:var(--muted);font-size:13px;margin-bottom:1.75rem; }
+    .auth-tabs { display:flex;border-bottom:1px solid rgba(255,255,255,.07);margin-bottom:1.5rem; }
+    .auth-error { color:#E07065;font-size:13px;margin-top:.5rem;min-height:18px; }
+    .admin-header { background:var(--dark2);border-bottom:1px solid rgba(201,168,76,.15);padding:1.25rem 2rem;margin-bottom:2rem;display:flex;align-items:center;justify-content:space-between; }
+    .admin-header h2 { font-family:'Playfair Display',serif;font-size:22px;margin:0; }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo" onclick="scrollTop()">TECHLUX</div>
+  <div class="nav-links" id="nav-links" style="display:none"></div>
+  <div class="nav-right" id="nav-right">
+    <button class="cart-btn" onclick="showPage('login')">Masuk</button>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <span class="toast-icon">✓</span>
+  <span id="toast-msg"></span>
+</div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- LOADING OVERLAY -->
+<div id="loading-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:1rem">
+  <div style="width:40px;height:40px;border:3px solid rgba(201,168,76,.3);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite"></div>
+  <span id="loading-msg" style="color:var(--gold);font-size:14px;letter-spacing:1px">Memproses...</span>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<!-- SIDE CART -->
+<div class="side-panel" id="cart-panel">
+  <div class="panel-header">
+    <h3>🛒 Keranjang Belanja</h3>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="panel-body" id="cart-body"></div>
+  <div class="panel-footer" id="cart-footer"></div>
+</div>
+
+<!-- MODAL CHECKOUT -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <h3 style="margin:0">📦 Detail Pesanan</h3>
+      <button class="close-btn" onclick="closeModal('checkout-modal')">✕</button>
+    </div>
+    <div class="order-summary" id="checkout-summary"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Nama Lengkap</label><input type="text" id="cust-name" placeholder="Budi Santoso"></div>
+      <div class="form-group"><label>No. Handphone</label><input type="text" id="cust-phone" placeholder="08xxxxxxxxxx"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" id="cust-email"></div>
+    <div class="form-group"><label>Alamat Pengiriman</label><textarea id="cust-address" placeholder="Jl. Contoh No. 12, Kota, Provinsi"></textarea></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Metode Pembayaran</label>
+        <select id="payment-method">
+          <option value="">Pilih Metode</option>
+          <option>Transfer Bank (BCA)</option><option>Transfer Bank (Mandiri)</option>
+          <option>GoPay</option><option>OVO</option><option>Dana</option>
+          <option>QRIS</option><option>COD</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Ekspedisi</label>
+        <select id="shipping-method">
+          <option>JNE Reguler</option><option>JNE Express</option>
+          <option>J&T Express</option><option>SiCepat</option><option>AnterAja</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label>Catatan (opsional)</label><textarea id="order-note" placeholder="Catatan khusus..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="closeModal('checkout-modal')">Batal</button>
+      <button class="btn-primary" onclick="placeOrder()">✓ Konfirmasi Pesanan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SUKSES -->
+<div class="modal-overlay" id="success-modal">
+  <div class="modal" style="max-width:420px">
+    <div class="success-modal">
+      <div class="success-icon">🎉</div>
+      <h3>Pesanan Berhasil!</h3>
+      <p>Terima kasih atas pembelian Anda. Pesanan sedang kami proses.</p>
+      <p id="success-order-id" style="color:var(--gold);font-weight:600;font-size:16px;margin-bottom:1.5rem"></p>
+      <button class="btn-primary" style="width:100%" onclick="closeModal('success-modal');showPage('history')">Lihat Riwayat Pesanan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal detail-modal" id="detail-modal-content"></div>
+</div>
+
+<!-- ===== HALAMAN ===== -->
+<main>
+
+  <!-- LOGIN / REGISTER -->
+  <div class="page active" id="page-login">
+    <div class="auth-wrap">
+      <div class="auth-logo">TECHLUX</div>
+      <div class="auth-sub">Selamat datang kembali</div>
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="auth-tab active" id="tab-login" onclick="showAuthTab('login')">Masuk</button>
+          <button class="auth-tab" id="tab-register" onclick="showAuthTab('register')">Daftar</button>
+        </div>
+
+        <!-- Form Login -->
+        <div id="login-form">
+          <div class="form-group"><label>Email</label><input type="email" id="login-email" placeholder="email@contoh.com" onkeydown="if(event.key==='Enter')login()"></div>
+          <div class="form-group"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()"></div>
+          <div class="auth-error" id="login-error"></div>
+          <button class="btn-primary" style="width:100%;padding:13px;margin-top:1rem" onclick="login()">Masuk →</button>
+        </div>
+
+        <!-- Form Register -->
+        <div id="register-form" style="display:none">
+          <div class="form-group"><label>Nama Lengkap</label><input type="text" id="reg-name" placeholder="Nama kamu"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="reg-email" placeholder="email@contoh.com"></div>
+          <div class="form-group"><label>Password</label><input type="password" id="reg-pass" placeholder="Min. 6 karakter"></div>
+          <div class="form-group"><label>Ulangi Password</label><input type="password" id="reg-pass2" placeholder="Ulangi password" onkeydown="if(event.key==='Enter')register()"></div>
+          <div class="auth-error" id="reg-error"></div>
+          <button class="btn-primary" style="width:100%;padding:13px;margin-top:1rem" onclick="register()">Daftar Sekarang →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOKO -->
+  <div class="page" id="page-shop">
+    <div class="hero">
+      <div class="hero-badge">Premium Collection 2025</div>
+      <h1>Teknologi &amp; <span>Kemewahan</span><br>Dalam Satu Tempat</h1>
+      <p>Temukan koleksi jam tangan mewah dan laptop premium terbaik pilihan para profesional modern.</p>
+      <div class="hero-cta">
+        <button class="btn-primary" onclick="document.getElementById('products').scrollIntoView({behavior:'smooth'})">Belanja Sekarang</button>
+        <button class="btn-outline" onclick="showPage('contact')">Hubungi Kami</button>
+      </div>
+    </div>
+    <div class="section" id="products">
+      <div class="section-header">
+        <div class="gold-line"></div>
+        <h2>Koleksi Produk</h2>
+        <p>Pilihan terbaik untuk gaya hidup modern Anda</p>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterProducts('all',this)">Semua</button>
+        <button class="filter-btn" onclick="filterProducts('watch',this)">⌚ Jam Tangan</button>
+        <button class="filter-btn" onclick="filterProducts('laptop',this)">💻 Laptop</button>
+      </div>
+      <div class="product-grid" id="product-grid"></div>
+    </div>
+  </div>
+
+  <!-- RIWAYAT -->
+  <div class="page" id="page-history">
+    <div class="section">
+      <div class="section-header">
+        <div class="gold-line"></div>
+        <h2>Riwayat Transaksi</h2>
+        <p>Klik pada baris pesanan untuk melihat detail lengkap</p>
+      </div>
+      <div id="history-content"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div class="page" id="page-admin">
+    <div class="admin-header">
+      <h2>👑 Dashboard Admin</h2>
+      <button class="btn-outline" style="padding:8px 16px;font-size:13px" onclick="renderAdmin()">🔄 Refresh</button>
+    </div>
+    <div class="section" style="padding-top:0">
+      <div id="admin-content"></div>
+    </div>
+  </div>
+
+  <!-- TENTANG KAMI -->
+  <div class="page" id="page-about">
+
+    <!-- HERO ABOUT -->
+    <div class="about-hero">
+      <div class="about-hero-bg"></div>
+      <div class="about-hero-content">
+        <div class="hero-badge">Est. 2019 — Bandung, Indonesia</div>
+        <h1>Lebih dari Sekadar <span>Toko</span></h1>
+        <p>Kami hadir untuk mendekatkan Anda dengan teknologi dan kemewahan terbaik dunia — tanpa kompromi pada kualitas maupun pengalaman berbelanja.</p>
+      </div>
+      <div class="about-hero-stat-row">
+        <div class="about-stat">
+          <div class="about-stat-num">5+</div>
+          <div class="about-stat-label">Tahun Berpengalaman</div>
+        </div>
+        <div class="about-stat-divider"></div>
+        <div class="about-stat">
+          <div class="about-stat-num">12K+</div>
+          <div class="about-stat-label">Pelanggan Puas</div>
+        </div>
+        <div class="about-stat-divider"></div>
+        <div class="about-stat">
+          <div class="about-stat-num">98%</div>
+          <div class="about-stat-label">Tingkat Kepuasan</div>
+        </div>
+        <div class="about-stat-divider"></div>
+        <div class="about-stat">
+          <div class="about-stat-num">200+</div>
+          <div class="about-stat-label">Brand Premium</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VISI & MISI -->
+    <div class="section">
+      <div class="about-vm-grid">
+        <div class="about-vm-card">
+          <div class="about-vm-icon">◈</div>
+          <h3>Visi Kami</h3>
+          <p>Menjadi destinasi utama teknologi dan kemewahan di Indonesia — tempat di mana setiap produk yang Anda sentuh adalah karya terbaik dari tangan para maestro dunia.</p>
+        </div>
+        <div class="about-vm-card featured">
+          <div class="about-vm-icon gold">✦</div>
+          <h3>Misi Kami</h3>
+          <ul class="about-mission-list">
+            <li>Menghadirkan produk 100% original bergaransi resmi</li>
+            <li>Memberikan pelayanan konsultasi personal tanpa tekanan</li>
+            <li>Memastikan pengiriman aman ke seluruh penjuru Indonesia</li>
+            <li>Membangun komunitas pecinta teknologi &amp; horology</li>
+          </ul>
+        </div>
+        <div class="about-vm-card">
+          <div class="about-vm-icon">⬡</div>
+          <h3>Nilai Kami</h3>
+          <p>Integritas, keahlian, dan kepercayaan adalah fondasi kami. Setiap interaksi dengan pelanggan kami perlakukan seperti bertemu sahabat lama yang patut mendapat yang terbaik.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CERITA KAMI -->
+    <div class="about-story-section">
+      <div class="section" style="padding-top:0;padding-bottom:0">
+        <div class="about-story-grid">
+          <div class="about-story-visual">
+            <div class="about-story-img-frame">
+              <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&q=80" alt="TechLux Store" loading="lazy">
+              <div class="about-story-img-badge">
+                <span class="about-story-badge-year">2019</span>
+                <span class="about-story-badge-text">Berdiri di Bandung</span>
+              </div>
+            </div>
+            <div class="about-story-img-accent"></div>
+          </div>
+          <div class="about-story-text">
+            <div class="gold-line"></div>
+            <h2>Kisah di Balik<br><span style="color:var(--gold)">TECHLUX</span></h2>
+            <p>TechLux lahir dari sebuah mimpi sederhana: menghadirkan akses ke produk-produk terbaik dunia bagi masyarakat Indonesia, tanpa harus terbang ke luar negeri.</p>
+            <p>Dimulai dari sebuah ruangan kecil di Jl. Purnawarman, Bandung, kami memulai perjalanan dengan keyakinan bahwa setiap orang berhak memiliki produk berkualitas nyata — bukan sekadar merek.</p>
+            <p>Hari ini, TechLux telah melayani lebih dari 12.000 pelanggan dari Sabang sampai Merauke, dengan tim berdedikasi yang mencintai teknologi dan horology sebagaimana kami mencintai pelanggan kami.</p>
+            <div class="about-story-signature">
+              <div class="about-sig-line"></div>
+              <div>
+                <div class="about-sig-name">Rafan Fauzi</div>
+                <div class="about-sig-title">Founder & CEO, TechLux</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KEUNGGULAN -->
+    <div class="section">
+      <div class="section-header" style="text-align:center">
+        <div class="gold-line" style="margin:0 auto 1rem"></div>
+        <h2>Mengapa Memilih Kami?</h2>
+        <p>Standar premium yang tidak pernah kami kompromikan</p>
+      </div>
+      <div class="about-features-grid">
+        <div class="about-feature-card">
+          <div class="about-feature-icon">🛡️</div>
+          <h4>100% Produk Original</h4>
+          <p>Setiap produk dilengkapi sertifikat keaslian dan garansi resmi. Kami berkolaborasi langsung dengan distributor resmi untuk menjamin keaslian setiap item.</p>
+        </div>
+        <div class="about-feature-card">
+          <div class="about-feature-icon">🔍</div>
+          <h4>Kurasi Ketat</h4>
+          <p>Tim ahli kami menyeleksi setiap produk berdasarkan standar kualitas, keandalan, dan nilai jangka panjang sebelum hadir di katalog TechLux.</p>
+        </div>
+        <div class="about-feature-card">
+          <div class="about-feature-icon">💬</div>
+          <h4>Konsultasi Personal</h4>
+          <p>Bingung memilih? Tim kami siap memberikan saran jujur tanpa tekanan. Kami ingin Anda puas, bukan sekadar membeli.</p>
+        </div>
+        <div class="about-feature-card">
+          <div class="about-feature-icon">📦</div>
+          <h4>Pengiriman Aman</h4>
+          <p>Setiap pesanan dikemas berlapis dengan proteksi maksimal dan diasuransikan penuh selama perjalanan ke tangan Anda.</p>
+        </div>
+        <div class="about-feature-card">
+          <div class="about-feature-icon">🔄</div>
+          <h4>After-Sales Terpercaya</h4>
+          <p>Hubungan kami tidak berhenti di transaksi. Tim purna jual kami siap membantu servis, klaim garansi, dan pertanyaan teknis kapan pun.</p>
+        </div>
+        <div class="about-feature-card">
+          <div class="about-feature-icon">💎</div>
+          <h4>Program Loyalitas</h4>
+          <p>Pelanggan setia mendapatkan akses eksklusif ke pre-order, diskon member, dan undangan event private TechLux.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRAND PARTNER -->
+    <div class="about-brands-section">
+      <div class="section" style="padding-top:3rem;padding-bottom:3rem">
+        <div class="section-header" style="text-align:center">
+          <div class="gold-line" style="margin:0 auto 1rem"></div>
+          <h2>Brand Partner Kami</h2>
+          <p>Bermitra langsung dengan brand terkemuka dunia</p>
+        </div>
+        <div class="about-brands-row">
+          <div class="about-brand-pill">ROLEX</div>
+          <div class="about-brand-pill">OMEGA</div>
+          <div class="about-brand-pill">TAG HEUER</div>
+          <div class="about-brand-pill">APPLE</div>
+          <div class="about-brand-pill">DELL</div>
+          <div class="about-brand-pill">ASUS ROG</div>
+          <div class="about-brand-pill">LENOVO</div>
+          <div class="about-brand-pill">CASIO</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="about-cta-section">
+      <div class="about-cta-content">
+        <h2>Siap Merasakan Pengalaman TechLux?</h2>
+        <p>Jelajahi koleksi kami atau hubungi tim kami untuk konsultasi gratis</p>
+        <div class="hero-cta">
+          <button class="btn-primary" onclick="showPage('shop')">Mulai Belanja</button>
+          <button class="btn-outline" onclick="showPage('contact')">Hubungi Kami</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- KONTAK -->
+  <div class="page" id="page-contact">
+    <div class="section">
+      <div class="section-header">
+        <div class="gold-line"></div>
+        <h2>Hubungi Kami</h2>
+        <p>Kami siap membantu Anda 7 hari seminggu</p>
+      </div>
+      <div class="contact-grid">
+        <div class="contact-card"><div class="contact-icon">📍</div><h4>Alamat Toko</h4><p>Jl. Purnawarman No. 25, Sumur Bandung<br>Kota Bandung, Jawa Barat 40117</p></div>
+        <div class="contact-card"><div class="contact-icon">📞</div><h4>Telepon & WhatsApp</h4><p><a href="tel:+6221-5551234">+62 21-555-1234</a><br><a href="https://wa.me/6282295165860" target="_blank">+62 822-9516-5860 (WA)</a></p></div>
+        <div class="contact-card"><div class="contact-icon">📧</div><h4>Email</h4><p><a href="mailto:rafanfauzi27@gmail.com">uFo</a><br><a href="mailto:rafanfauzi27@gmail.com">Rafan</a></p></div>
+        <div class="contact-card"><div class="contact-icon">🕐</div><h4>Jam Operasional</h4><p>Senin – Jumat: 09.00 – 18.00<br>Sabtu: 09.00 – 15.00<br>Minggu: Tutup</p></div>
+      </div>
+      <div class="contact-form-wrap">
+        <h3>Kirim Pesan</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Nama</label><input type="text" id="contact-name" placeholder="Nama Anda"></div>
+          <div class="form-group"><label>Email</label><input type="email" id="contact-email" placeholder="email@contoh.com"></div>
+        </div>
+        <div class="form-group"><label>Subjek</label><input type="text" id="contact-subject" placeholder="Pertanyaan produk, dll."></div>
+        <div class="form-group"><label>Pesan</label><textarea id="contact-message" style="min-height:120px" placeholder="Tulis pesan Anda..."></textarea></div>
+        <button class="btn-primary" onclick="sendContact()">📨 Kirim Pesan</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>

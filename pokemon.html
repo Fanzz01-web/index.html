@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PokéStore — Kartu Pokémon Indonesia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red: #E3350D;
+      --red2: #FF6B35;
+      --yellow: #FFD700;
+      --yellow2: #FFF176;
+      --blue: #1565C0;
+      --blue2: #42A5F5;
+      --dark: #1A1A2E;
+      --dark2: #16213E;
+      --dark3: #0F3460;
+      --white: #FFFFFF;
+      --muted: #B0BEC5;
+      --card-bg: #1E2A45;
+      --success: #43A047;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Nunito',sans-serif; background:var(--dark); color:var(--white); min-height:100vh; }
+
+    /* NAVBAR */
+    nav {
+      background: linear-gradient(90deg, var(--red) 0%, #B71C1C 100%);
+      padding: 0 2rem; height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top:0; z-index:100;
+      box-shadow: 0 4px 20px rgba(227,53,13,.4);
+    }
+    .nav-logo { font-family:'Press Start 2P',monospace; font-size:14px; color:var(--yellow); letter-spacing:1px; cursor:pointer; text-shadow:2px 2px 0 rgba(0,0,0,.3); }
+    .nav-logo span { color:var(--white); }
+    .nav-links { display:flex; gap:1.5rem; }
+    .nav-links a { color:rgba(255,255,255,.85); font-size:14px; font-weight:700; text-decoration:none; cursor:pointer; transition:color .2s; padding:4px 0; border-bottom:2px solid transparent; }
+    .nav-links a:hover, .nav-links a.active { color:var(--yellow); border-bottom-color:var(--yellow); }
+    .nav-right { display:flex; align-items:center; gap:1rem; }
+    .cart-btn { background:var(--yellow); color:var(--dark); border:none; cursor:pointer; padding:8px 18px; border-radius:20px; font-size:13px; font-weight:800; transition:transform .2s,opacity .2s; }
+    .cart-btn:hover { transform:scale(1.05); opacity:.9; }
+    .badge { background:var(--dark); color:var(--yellow); border-radius:50%; width:20px; height:20px; font-size:11px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; margin-left:4px; }
+    .back-btn { background:rgba(255,255,255,.15); color:var(--white); border:none; cursor:pointer; padding:8px 16px; border-radius:20px; font-size:13px; font-weight:700; transition:background .2s; text-decoration:none; display:inline-flex; align-items:center; gap:.5rem; }
+    .back-btn:hover { background:rgba(255,255,255,.25); }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, var(--dark2) 0%, var(--dark3) 50%, #1A237E 100%);
+      padding: 4rem 2rem; text-align:center; position:relative; overflow:hidden;
+      border-bottom: 3px solid var(--yellow);
+    }
+    .hero::before {
+      content:''; position:absolute; inset:0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255,215,0,.08) 0%, transparent 70%);
+    }
+    .pokeball-bg { position:absolute; right:-80px; top:-80px; width:300px; height:300px; border-radius:50%; border:40px solid rgba(255,255,255,.04); }
+    .pokeball-bg2 { position:absolute; left:-60px; bottom:-60px; width:200px; height:200px; border-radius:50%; border:30px solid rgba(255,215,0,.06); }
+    .hero-badge { display:inline-block; background:rgba(255,215,0,.15); border:2px solid var(--yellow); color:var(--yellow); font-size:11px; font-weight:800; letter-spacing:2px; padding:6px 16px; border-radius:20px; margin-bottom:1.5rem; text-transform:uppercase; }
+    .hero h1 { font-family:'Press Start 2P',monospace; font-size:clamp(14px,3vw,26px); line-height:1.6; margin-bottom:1rem; }
+    .hero h1 span { color:var(--yellow); }
+    .hero p { color:var(--muted); font-size:15px; max-width:500px; margin:0 auto 2rem; line-height:1.7; font-weight:600; }
+    .hero-stats { display:flex; gap:2rem; justify-content:center; flex-wrap:wrap; margin-top:1.5rem; }
+    .hero-stat { text-align:center; }
+    .hero-stat-num { font-family:'Press Start 2P',monospace; font-size:18px; color:var(--yellow); }
+    .hero-stat-label { font-size:12px; color:var(--muted); margin-top:.25rem; font-weight:600; }
+
+    /* SECTION */
+    .section { padding:3rem 2rem; max-width:1200px; margin:0 auto; }
+    .section-header { margin-bottom:2rem; }
+    .section-header h2 { font-family:'Press Start 2P',monospace; font-size:16px; color:var(--yellow); margin-bottom:.5rem; line-height:1.6; }
+    .section-header p { color:var(--muted); font-size:14px; font-weight:600; }
+
+    /* FILTER */
+    .filter-bar { display:flex; gap:.75rem; margin-bottom:2rem; flex-wrap:wrap; align-items:center; }
+    .filter-label { font-size:13px; color:var(--muted); font-weight:700; }
+    .filter-btn { padding:7px 18px; border-radius:20px; font-size:13px; font-weight:700; cursor:pointer; border:2px solid rgba(255,255,255,.1); background:transparent; color:var(--muted); transition:all .2s; font-family:'Nunito',sans-serif; }
+    .filter-btn:hover { border-color:var(--yellow); color:var(--yellow); }
+    .filter-btn.active { background:var(--yellow); color:var(--dark); border-color:var(--yellow); }
+    .search-input { padding:8px 16px; border-radius:20px; border:2px solid rgba(255,255,255,.1); background:var(--card-bg); color:var(--white); font-size:13px; font-weight:600; font-family:'Nunito',sans-serif; outline:none; transition:border-color .2s; min-width:200px; }
+    .search-input:focus { border-color:var(--yellow); }
+    .search-input::placeholder { color:var(--muted); }
+
+    /* CARD LIST */
+    .card-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid rgba(255,255,255,.07); border-radius:12px; overflow:hidden; }
+    @media(max-width:700px){ .card-grid { grid-template-columns:1fr; } }
+
+    /* POKEMON LIST ROW */
+    .poke-card {
+      display:flex; align-items:center; gap:1rem;
+      padding: 1rem 1.2rem 1rem 1rem;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      cursor:pointer;
+      transition: background .15s;
+      position:relative;
+      background: transparent;
+    }
+    .poke-card:nth-child(odd) { border-right: 1px solid rgba(255,255,255,.07); }
+    .poke-card:last-child, .poke-card:nth-last-child(2):nth-child(odd) { border-bottom:none; }
+    .poke-card:hover { background: rgba(255,215,0,.05); }
+
+    /* Pack image */
+    .poke-card-img {
+      width: 68px; height: 88px;
+      flex-shrink: 0;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 2px 4px 14px rgba(0,0,0,.55);
+    }
+    .poke-card-img svg { width:100%; height:100%; display:block; }
+
+    /* Card info */
+    .poke-card-body { flex:1; min-width:0; }
+    .poke-number { display:none; }
+    .poke-name { font-size:15px; font-weight:800; color:var(--white); margin-bottom:.25rem; line-height:1.4; font-family:'Nunito',sans-serif; }
+    .poke-types { display:flex; gap:.35rem; flex-wrap:wrap; margin-bottom:.3rem; }
+    .poke-type { padding:2px 9px; border-radius:20px; font-size:10px; font-weight:800; text-transform:uppercase; }
+    .poke-stats-mini { display:none; }
+    .poke-footer { display:flex; align-items:center; justify-content:space-between; margin-top:.4rem; gap:.5rem; }
+    .poke-price { font-size:13px; font-weight:800; color:var(--yellow); white-space:nowrap; }
+    .add-btn { background:var(--red); color:var(--white); border:none; padding:5px 12px; border-radius:20px; font-size:11px; font-weight:800; cursor:pointer; transition:all .2s; font-family:'Nunito',sans-serif; white-space:nowrap; }
+    .add-btn:hover { background:var(--red2); transform:scale(1.05); }
+    .rarity-badge { font-size:10px; font-weight:800; padding:2px 8px; border-radius:20px; display:inline-block; margin-bottom:.3rem; position:static; }
+    .poke-chevron { color:var(--muted); font-size:16px; flex-shrink:0; transition:color .15s; margin-left:.2rem; }
+    .poke-card:hover .poke-chevron { color:var(--yellow); }
+
+    /* TYPE COLORS */
+    .type-fire { background:#FF6B35; color:#fff; }
+    .type-water { background:#42A5F5; color:#fff; }
+    .type-grass { background:#66BB6A; color:#fff; }
+    .type-electric { background:#FFD700; color:#333; }
+    .type-psychic { background:#EC407A; color:#fff; }
+    .type-normal { background:#A5A5A5; color:#fff; }
+    .type-fighting { background:#C62828; color:#fff; }
+    .type-poison { background:#AB47BC; color:#fff; }
+    .type-ground { background:#D4A04A; color:#fff; }
+    .type-flying { background:#90CAF9; color:#333; }
+    .type-bug { background:#8BC34A; color:#fff; }
+    .type-rock { background:#78909C; color:#fff; }
+    .type-ghost { background:#5C6BC0; color:#fff; }
+    .type-dragon { background:#3F51B5; color:#fff; }
+    .type-dark { background:#424242; color:#fff; }
+    .type-steel { background:#90A4AE; color:#333; }
+    .type-ice { background:#80DEEA; color:#333; }
+    .type-fairy { background:#F48FB1; color:#fff; }
+
+    /* RARITY */
+    .rarity-common { background:rgba(165,165,165,.2); color:#A5A5A5; border:1px solid #A5A5A5; }
+    .rarity-uncommon { background:rgba(102,187,106,.2); color:#66BB6A; border:1px solid #66BB6A; }
+    .rarity-rare { background:rgba(66,165,245,.2); color:#42A5F5; border:1px solid #42A5F5; }
+    .rarity-legendary { background:rgba(255,215,0,.2); color:var(--yellow); border:1px solid var(--yellow); }
+
+    /* SIDE CART */
+    .side-panel { position:fixed; right:-480px; top:0; width:440px; height:100vh; background:var(--dark2); border-left:3px solid var(--yellow); z-index:300; transition:right .35s cubic-bezier(.4,0,.2,1); display:flex; flex-direction:column; }
+    .side-panel.open { right:0; }
+    .panel-header { padding:1.5rem; border-bottom:1px solid rgba(255,255,255,.07); display:flex; align-items:center; justify-content:space-between; background:linear-gradient(90deg,var(--red),#B71C1C); }
+    .panel-header h3 { font-family:'Press Start 2P',monospace; font-size:12px; color:var(--yellow); }
+    .close-btn { background:rgba(255,255,255,.2); border:none; color:var(--white); width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:background .2s; }
+    .close-btn:hover { background:rgba(255,255,255,.35); }
+    .panel-body { flex:1; overflow-y:auto; padding:1.25rem; }
+    .panel-footer { padding:1.25rem; border-top:1px solid rgba(255,255,255,.07); }
+    .cart-item { display:flex; gap:1rem; padding:.75rem; border-bottom:1px solid rgba(255,255,255,.05); border-radius:8px; margin-bottom:4px; transition:background .2s; }
+    .cart-item:hover { background:rgba(255,215,0,.05); }
+    .cart-thumb { width:60px; height:60px; background:var(--dark3); border-radius:8px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; }
+    .cart-thumb img { width:50px; height:50px; object-fit:contain; }
+    .cart-item-info { flex:1; }
+    .cart-item-name { font-size:12px; font-weight:800; margin-bottom:4px; font-family:'Press Start 2P',monospace; line-height:1.4; }
+    .cart-item-controls { display:flex; align-items:center; gap:.5rem; margin-top:.4rem; }
+    .qty-btn { background:var(--dark3); border:none; color:var(--white); width:24px; height:24px; border-radius:6px; cursor:pointer; font-size:14px; transition:background .2s; }
+    .qty-btn:hover { background:var(--yellow); color:var(--dark); }
+    .qty-num { font-size:13px; font-weight:800; min-width:20px; text-align:center; }
+    .cart-item-price { font-size:12px; color:var(--yellow); font-weight:800; white-space:nowrap; margin-left:auto; }
+    .remove-item { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; transition:color .2s; }
+    .remove-item:hover { color:#E57373; }
+    .total-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:.5rem; }
+    .total-label { color:var(--muted); font-size:13px; font-weight:700; }
+    .total-value { font-family:'Press Start 2P',monospace; font-size:14px; color:var(--yellow); }
+    .checkout-btn { width:100%; background:linear-gradient(90deg,var(--red),var(--red2)); color:var(--white); border:none; padding:14px; border-radius:25px; font-size:14px; font-weight:800; cursor:pointer; transition:opacity .2s; margin-top:.5rem; font-family:'Nunito',sans-serif; letter-spacing:.5px; }
+    .checkout-btn:hover { opacity:.85; }
+    .empty-cart { text-align:center; padding:3rem 1rem; color:var(--muted); }
+    .empty-icon { font-size:48px; margin-bottom:1rem; }
+
+    /* OVERLAY */
+    .overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:200; }
+    .overlay.show { display:block; }
+
+    /* MODAL */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:400; align-items:center; justify-content:center; }
+    .modal-overlay.show { display:flex; }
+    .modal { background:var(--dark2); border:2px solid var(--yellow); border-radius:20px; width:90%; max-width:520px; padding:2rem; max-height:90vh; overflow-y:auto; }
+    .form-group { margin-bottom:1.25rem; }
+    .form-group label { display:block; font-size:12px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; margin-bottom:.5rem; font-weight:700; }
+    .form-group input, .form-group textarea, .form-group select { width:100%; background:var(--dark3); border:2px solid rgba(255,255,255,.1); color:var(--white); padding:10px 14px; border-radius:10px; font-size:14px; font-family:'Nunito',sans-serif; transition:border-color .2s; }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline:none; border-color:var(--yellow); }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    select option { background:var(--dark3); }
+
+    /* DETAIL MODAL */
+    .detail-modal { max-width:560px; }
+
+    /* TOAST */
+    .toast { position:fixed; bottom:2rem; right:2rem; z-index:999; background:var(--dark2); border:2px solid var(--yellow); color:var(--white); padding:.9rem 1.5rem; border-radius:12px; font-size:14px; font-weight:700; display:flex; align-items:center; gap:.75rem; transform:translateY(80px); opacity:0; transition:all .35s; box-shadow:0 8px 32px rgba(0,0,0,.5); }
+    .toast.show { transform:translateY(0); opacity:1; }
+    .toast-icon { font-size:18px; }
+
+    /* LOADING */
+    #loading-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.8); z-index:999; align-items:center; justify-content:center; flex-direction:column; gap:1rem; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .spinner { width:48px; height:48px; border:4px solid rgba(255,215,0,.2); border-top-color:var(--yellow); border-radius:50%; animation:spin .8s linear infinite; }
+
+    /* SUCCESS */
+    .success-modal { text-align:center; padding:1rem; }
+    .success-icon { font-size:60px; margin-bottom:1rem; }
+
+    /* LOADING CARDS */
+    .skeleton { background:linear-gradient(90deg,var(--card-bg) 25%,var(--dark3) 50%,var(--card-bg) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:16px; height:300px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ORDER SUMMARY */
+    .order-summary { background:var(--dark3); border-radius:12px; padding:1rem; margin-bottom:1.5rem; border:1px solid rgba(255,215,0,.1); }
+    .order-summary-title { font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:.75rem; font-weight:700; }
+    .summary-item { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; color:var(--muted); }
+    .summary-total { display:flex; justify-content:space-between; font-size:15px; font-weight:800; color:var(--yellow); border-top:1px solid rgba(255,255,255,.07); padding-top:.75rem; margin-top:.5rem; }
+
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:var(--dark2); }
+    ::-webkit-scrollbar-thumb { background:var(--dark3); border-radius:4px; }
+
+    @media(max-width:640px) {
+      .nav-links { display:none; }
+      .side-panel { width:100%; }
+      .form-row { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo" onclick="showPage('shop')">POKÉ<span>STORE</span></div>
+  <div class="nav-links">
+    <a onclick="showPage('shop')" class="active" id="nav-shop">🃏 Kartu</a>
+    <a onclick="showPage('history')" id="nav-history">📋 Pesanan</a>
+  </div>
+  <div class="nav-right">
+    <a href="index.html" class="back-btn">← TechLux</a>
+    <button class="cart-btn" onclick="toggleCart()">🛒 Keranjang <span class="badge" id="cart-count">0</span></button>
+  </div>
+</nav>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span class="toast-icon">⚡</span><span id="toast-msg"></span></div>
+
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<!-- LOADING -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <span id="loading-msg" style="color:var(--yellow);font-family:'Press Start 2P',monospace;font-size:11px">Loading...</span>
+</div>
+
+<!-- SIDE CART -->
+<div class="side-panel" id="cart-panel">
+  <div class="panel-header">
+    <h3>🛒 Keranjang</h3>
+    <button class="close-btn" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="panel-body" id="cart-body"></div>
+  <div class="panel-footer" id="cart-footer"></div>
+</div>
+
+<!-- MODAL CHECKOUT -->
+<div class="modal-overlay" id="checkout-modal">
+  <div class="modal">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <h3 style="font-family:'Press Start 2P',monospace;font-size:13px;color:var(--yellow)">CHECKOUT</h3>
+      <button class="close-btn" onclick="closeModal('checkout-modal')">✕</button>
+    </div>
+    <div class="order-summary" id="checkout-summary"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Nama Lengkap</label><input type="text" id="cust-name" placeholder="Ash Ketchum"></div>
+      <div class="form-group"><label>No. HP</label><input type="text" id="cust-phone" placeholder="08xxxxxxxxxx"></div>
+    </div>
+    <div class="form-group"><label>Email</label><input type="email" id="cust-email" placeholder="trainer@pokemon.com"></div>
+    <div class="form-group"><label>Alamat</label><textarea id="cust-address" placeholder="Jl. Pallet Town No. 1..."></textarea></div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Pembayaran</label>
+        <select id="payment-method">
+          <option value="">Pilih</option>
+          <option>Transfer BCA</option><option>Transfer Mandiri</option>
+          <option>GoPay</option><option>OVO</option><option>Dana</option><option>QRIS</option><option>COD</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Ekspedisi</label>
+        <select id="shipping-method">
+          <option>JNE Reguler</option><option>JNE Express</option><option>J&T</option><option>SiCepat</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:1rem;margin-top:1rem">
+      <button onclick="closeModal('checkout-modal')" style="flex:1;padding:12px;border:2px solid rgba(255,255,255,.1);background:transparent;color:var(--white);border-radius:25px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif">Batal</button>
+      <button onclick="placeOrder()" style="flex:2;padding:12px;background:linear-gradient(90deg,var(--red),var(--red2));color:var(--white);border:none;border-radius:25px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif">⚡ Konfirmasi</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SUKSES -->
+<div class="modal-overlay" id="success-modal">
+  <div class="modal" style="max-width:400px">
+    <div class="success-modal">
+      <div class="success-icon">🎉</div>
+      <h3 style="font-family:'Press Start 2P',monospace;font-size:14px;margin-bottom:1rem;color:var(--yellow)">YEAY!</h3>
+      <p style="color:var(--muted);font-size:14px;font-weight:600;line-height:1.7;margin-bottom:.5rem">Pesanan berhasil! Kartu Pokémon kamu sedang diproses.</p>
+      <p id="success-order-id" style="color:var(--yellow);font-weight:800;font-size:14px;margin-bottom:1.5rem"></p>
+      <button onclick="closeModal('success-modal');showPage('history')" style="width:100%;padding:13px;background:linear-gradient(90deg,var(--red),var(--red2));color:var(--white);border:none;border-radius:25px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif">Lihat Pesanan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETAIL -->
+<div class="modal-overlay" id="detail-modal">
+  <div class="modal detail-modal" id="detail-modal-content"></div>
+</div>
+
+<main>
+
+  <!-- HALAMAN TOKO -->
+  <div class="page active" id="page-shop">
+    <div class="hero">
+      <div class="pokeball-bg"></div>
+      <div class="pokeball-bg2"></div>
+      <div style="position:relative;z-index:1">
+        <div class="hero-badge">⚡ Koleksi Terlengkap</div>
+        <h1>Temukan Kartu<br><span>Pokémon</span> Favoritmu!</h1>
+        <p>Ratusan kartu Pokémon original tersedia. Lengkapi koleksimu sekarang!</p>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="hero-stat-num">150+</div><div class="hero-stat-label">Kartu Tersedia</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">100%</div><div class="hero-stat-label">Original</div></div>
+          <div class="hero-stat"><div class="hero-stat-num">18</div><div class="hero-stat-label">Tipe Pokémon</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <h2>🃏 KATALOG KARTU</h2>
+        <p>Klik kartu untuk lihat detail stats</p>
+      </div>
+      <div class="filter-bar">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-btn active" onclick="filterCards('all',this)">Semua</button>
+        <button class="filter-btn" onclick="filterCards('fire',this)">🔥 Fire</button>
+        <button class="filter-btn" onclick="filterCards('water',this)">💧 Water</button>
+        <button class="filter-btn" onclick="filterCards('grass',this)">🌿 Grass</button>
+        <button class="filter-btn" onclick="filterCards('electric',this)">⚡ Electric</button>
+        <button class="filter-btn" onclick="filterCards('psychic',this)">🔮 Psychic</button>
+        <button class="filter-btn" onclick="filterCards('dragon',this)">🐉 Dragon</button>
+        <input class="search-input" type="text" id="search-input" placeholder="🔍 Cari Pokémon..." oninput="searchCards(this.value)">
+      </div>
+      <div class="card-grid" id="card-grid">
+        ${Array(12).fill('<div class="skeleton"></div>').join('')}
+      </div>
+      <div style="text-align:center;margin-top:2rem">
+        <button id="load-more-btn" onclick="loadMore()" style="display:none;padding:12px 32px;background:linear-gradient(90deg,var(--red),var(--red2));color:var(--white);border:none;border-radius:25px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif">Load More Pokémon ↓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN RIWAYAT -->
+  <div class="page" id="page-history">
+    <div class="section">
+      <div class="section-header">
+        <h2>📋 RIWAYAT PESANAN</h2>
+        <p>Semua transaksi kartu Pokémon kamu</p>
+      </div>
+      <div id="history-content"></div>
+    </div>
+  </div>
+
+</main>
+
+<script type="module">
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+const SUPABASE_URL = 'https://ftjqcowiwsfmznaemnny.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0anFjb3dpd3NmbXpuYWVtbm55Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1MTk4MTYsImV4cCI6MjA5NTA5NTgxNn0.SLyZHn8dZ1LV5Er70GGYfg6A7Xv0-D9eUnCP_UZabZE';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ===== STATE =====
+let allCards = [];
+let filteredCards = [];
+let cart = [];
+let orders = [];
+let offset = 0;
+const PAGE_SIZE = 24;
+const PRICES = { legendary:850000, rare:250000, uncommon:75000, common:25000 };
+
+// ===== HELPER =====
+function fmt(n){ return 'Rp '+n.toLocaleString('id-ID'); }
+function genId(){ return 'PKM-'+Date.now().toString(36).toUpperCase(); }
+function getRarity(baseExp, isLegendary){
+  if(isLegendary) return 'legendary';
+  if(baseExp > 200) return 'rare';
+  if(baseExp > 100) return 'uncommon';
+  return 'common';
+}
+function getRarityLabel(r){ return {legendary:'✨ Legendary',rare:'💎 Rare',uncommon:'⭐ Uncommon',common:'• Common'}[r]; }
+function showLoading(m='Loading...'){ document.getElementById('loading-overlay').style.display='flex'; document.getElementById('loading-msg').textContent=m; }
+function hideLoading(){ document.getElementById('loading-overlay').style.display='none'; }
+
+// ===== POKEMON DATA (Gen 1 - 150 Pokemon) =====
+const POKEMON_RAW = [
+  {id:1,name:'bulbasaur',types:['grass','poison'],hp:45,atk:49,def:49,spd:45,height:7,weight:69,baseExp:64},
+  {id:2,name:'ivysaur',types:['grass','poison'],hp:60,atk:62,def:63,spd:60,height:10,weight:130,baseExp:142},
+  {id:3,name:'venusaur',types:['grass','poison'],hp:80,atk:82,def:83,spd:80,height:20,weight:1000,baseExp:263},
+  {id:4,name:'charmander',types:['fire'],hp:39,atk:52,def:43,spd:65,height:6,weight:85,baseExp:62},
+  {id:5,name:'charmeleon',types:['fire'],hp:58,atk:64,def:58,spd:80,height:11,weight:190,baseExp:142},
+  {id:6,name:'charizard',types:['fire','flying'],hp:78,atk:84,def:78,spd:100,height:17,weight:905,baseExp:267},
+  {id:7,name:'squirtle',types:['water'],hp:44,atk:48,def:65,spd:43,height:5,weight:90,baseExp:63},
+  {id:8,name:'wartortle',types:['water'],hp:59,atk:63,def:80,spd:58,height:10,weight:225,baseExp:142},
+  {id:9,name:'blastoise',types:['water'],hp:79,atk:83,def:100,spd:78,height:16,weight:855,baseExp:265},
+  {id:10,name:'caterpie',types:['bug'],hp:45,atk:30,def:35,spd:45,height:3,weight:29,baseExp:39},
+  {id:11,name:'metapod',types:['bug'],hp:50,atk:20,def:55,spd:30,height:7,weight:99,baseExp:72},
+  {id:12,name:'butterfree',types:['bug','flying'],hp:60,atk:45,def:50,spd:70,height:11,weight:320,baseExp:178},
+  {id:13,name:'weedle',types:['bug','poison'],hp:40,atk:35,def:30,spd:50,height:3,weight:32,baseExp:39},
+  {id:14,name:'kakuna',types:['bug','poison'],hp:45,atk:25,def:50,spd:35,height:6,weight:100,baseExp:72},
+  {id:15,name:'beedrill',types:['bug','poison'],hp:65,atk:90,def:40,spd:75,height:10,weight:295,baseExp:178},
+  {id:16,name:'pidgey',types:['normal','flying'],hp:40,atk:45,def:40,spd:56,height:3,weight:18,baseExp:50},
+  {id:17,name:'pidgeotto',types:['normal','flying'],hp:63,atk:60,def:55,spd:71,height:11,weight:300,baseExp:122},
+  {id:18,name:'pidgeot',types:['normal','flying'],hp:83,atk:80,def:75,spd:101,height:15,weight:395,baseExp:216},
+  {id:19,name:'rattata',types:['normal'],hp:30,atk:56,def:35,spd:72,height:3,weight:35,baseExp:51},
+  {id:20,name:'raticate',types:['normal'],hp:55,atk:81,def:60,spd:97,height:7,weight:185,baseExp:145},
+  {id:21,name:'spearow',types:['normal','flying'],hp:40,atk:60,def:30,spd:70,height:3,weight:20,baseExp:52},
+  {id:22,name:'fearow',types:['normal','flying'],hp:65,atk:90,def:65,spd:100,height:12,weight:380,baseExp:155},
+  {id:23,name:'ekans',types:['poison'],hp:35,atk:60,def:44,spd:55,height:20,weight:69,baseExp:58},
+  {id:24,name:'arbok',types:['poison'],hp:60,atk:95,def:69,spd:80,height:35,weight:650,baseExp:157},
+  {id:25,name:'pikachu',types:['electric'],hp:35,atk:55,def:40,spd:90,height:4,weight:60,baseExp:112},
+  {id:26,name:'raichu',types:['electric'],hp:60,atk:90,def:55,spd:110,height:8,weight:300,baseExp:218},
+  {id:27,name:'sandshrew',types:['ground'],hp:50,atk:75,def:85,spd:40,height:6,weight:120,baseExp:60},
+  {id:28,name:'sandslash',types:['ground'],hp:75,atk:100,def:110,spd:65,height:10,weight:295,baseExp:158},
+  {id:29,name:'nidoran-f',types:['poison'],hp:55,atk:47,def:52,spd:41,height:4,weight:70,baseExp:55},
+  {id:30,name:'nidorina',types:['poison'],hp:70,atk:62,def:67,spd:56,height:8,weight:200,baseExp:128},
+  {id:31,name:'nidoqueen',types:['poison','ground'],hp:90,atk:92,def:87,spd:76,height:13,weight:600,baseExp:227},
+  {id:32,name:'nidoran-m',types:['poison'],hp:46,atk:57,def:40,spd:50,height:5,weight:90,baseExp:55},
+  {id:33,name:'nidorino',types:['poison'],hp:61,atk:72,def:57,spd:65,height:9,weight:195,baseExp:128},
+  {id:34,name:'nidoking',types:['poison','ground'],hp:81,atk:102,def:77,spd:85,height:14,weight:620,baseExp:227},
+  {id:35,name:'clefairy',types:['fairy'],hp:70,atk:45,def:48,spd:35,height:6,weight:75,baseExp:113},
+  {id:36,name:'clefable',types:['fairy'],hp:95,atk:70,def:73,spd:60,height:13,weight:400,baseExp:217},
+  {id:37,name:'vulpix',types:['fire'],hp:38,atk:41,def:40,spd:65,height:6,weight:99,baseExp:60},
+  {id:38,name:'ninetales',types:['fire'],hp:73,atk:76,def:75,spd:100,height:11,weight:199,baseExp:177},
+  {id:39,name:'jigglypuff',types:['normal','fairy'],hp:115,atk:45,def:20,spd:20,height:5,weight:55,baseExp:95},
+  {id:40,name:'wigglytuff',types:['normal','fairy'],hp:140,atk:70,def:45,spd:45,height:10,weight:120,baseExp:196},
+  {id:41,name:'zubat',types:['poison','flying'],hp:40,atk:45,def:35,spd:55,height:8,weight:75,baseExp:49},
+  {id:42,name:'golbat',types:['poison','flying'],hp:75,atk:80,def:70,spd:90,height:16,weight:550,baseExp:159},
+  {id:43,name:'oddish',types:['grass','poison'],hp:45,atk:50,def:55,spd:30,height:5,weight:54,baseExp:64},
+  {id:44,name:'gloom',types:['grass','poison'],hp:60,atk:65,def:70,spd:40,height:8,weight:86,baseExp:138},
+  {id:45,name:'vileplume',types:['grass','poison'],hp:75,atk:80,def:85,spd:50,height:12,weight:186,baseExp:221},
+  {id:46,name:'paras',types:['bug','grass'],hp:35,atk:70,def:55,spd:25,height:3,weight:54,baseExp:57},
+  {id:47,name:'parasect',types:['bug','grass'],hp:60,atk:95,def:80,spd:30,height:10,weight:295,baseExp:142},
+  {id:48,name:'venonat',types:['bug','poison'],hp:60,atk:55,def:50,spd:45,height:10,weight:300,baseExp:61},
+  {id:49,name:'venomoth',types:['bug','poison'],hp:70,atk:65,def:60,spd:90,height:15,weight:125,baseExp:158},
+  {id:50,name:'diglett',types:['ground'],hp:10,atk:55,def:25,spd:95,height:2,weight:8,baseExp:53},
+  {id:51,name:'dugtrio',types:['ground'],hp:35,atk:80,def:50,spd:120,height:7,weight:333,baseExp:149},
+  {id:52,name:'meowth',types:['normal'],hp:40,atk:45,def:35,spd:90,height:4,weight:42,baseExp:58},
+  {id:53,name:'persian',types:['normal'],hp:65,atk:70,def:60,spd:115,height:10,weight:320,baseExp:154},
+  {id:54,name:'psyduck',types:['water'],hp:50,atk:52,def:48,spd:55,height:8,weight:196,baseExp:64},
+  {id:55,name:'golduck',types:['water'],hp:80,atk:82,def:78,spd:85,height:17,weight:766,baseExp:175},
+  {id:56,name:'mankey',types:['fighting'],hp:40,atk:80,def:35,spd:70,height:5,weight:280,baseExp:61},
+  {id:57,name:'primeape',types:['fighting'],hp:65,atk:105,def:60,spd:95,height:10,weight:320,baseExp:159},
+  {id:58,name:'growlithe',types:['fire'],hp:55,atk:70,def:45,spd:60,height:7,weight:190,baseExp:70},
+  {id:59,name:'arcanine',types:['fire'],hp:90,atk:110,def:80,spd:95,height:19,weight:1550,baseExp:194},
+  {id:60,name:'poliwag',types:['water'],hp:40,atk:50,def:40,spd:90,height:6,weight:124,baseExp:60},
+  {id:61,name:'poliwhirl',types:['water'],hp:65,atk:65,def:65,spd:90,height:10,weight:200,baseExp:135},
+  {id:62,name:'poliwrath',types:['water','fighting'],hp:90,atk:95,def:95,spd:70,height:13,weight:540,baseExp:230},
+  {id:63,name:'abra',types:['psychic'],hp:25,atk:20,def:15,spd:90,height:9,weight:195,baseExp:62},
+  {id:64,name:'kadabra',types:['psychic'],hp:40,atk:35,def:30,spd:105,height:13,weight:565,baseExp:140},
+  {id:65,name:'alakazam',types:['psychic'],hp:55,atk:50,def:45,spd:120,height:15,weight:480,baseExp:225},
+  {id:66,name:'machop',types:['fighting'],hp:70,atk:80,def:50,spd:35,height:8,weight:195,baseExp:61},
+  {id:67,name:'machoke',types:['fighting'],hp:80,atk:100,def:70,spd:45,height:15,weight:705,baseExp:142},
+  {id:68,name:'machamp',types:['fighting'],hp:90,atk:130,def:80,spd:55,height:16,weight:1300,baseExp:227},
+  {id:69,name:'bellsprout',types:['grass','poison'],hp:50,atk:75,def:35,spd:40,height:7,weight:40,baseExp:60},
+  {id:70,name:'weepinbell',types:['grass','poison'],hp:65,atk:90,def:50,spd:55,height:10,weight:64,baseExp:137},
+  {id:71,name:'victreebel',types:['grass','poison'],hp:80,atk:105,def:65,spd:70,height:17,weight:155,baseExp:221},
+  {id:72,name:'tentacool',types:['water','poison'],hp:40,atk:40,def:35,spd:70,height:9,weight:455,baseExp:67},
+  {id:73,name:'tentacruel',types:['water','poison'],hp:80,atk:70,def:65,spd:100,height:16,weight:550,baseExp:180},
+  {id:74,name:'geodude',types:['rock','ground'],hp:40,atk:80,def:100,spd:20,height:4,weight:200,baseExp:60},
+  {id:75,name:'graveler',types:['rock','ground'],hp:55,atk:95,def:115,spd:35,height:10,weight:1050,baseExp:137},
+  {id:76,name:'golem',types:['rock','ground'],hp:80,atk:120,def:130,spd:45,height:14,weight:3000,baseExp:223},
+  {id:77,name:'ponyta',types:['fire'],hp:50,atk:85,def:55,spd:90,height:10,weight:300,baseExp:82},
+  {id:78,name:'rapidash',types:['fire'],hp:65,atk:100,def:70,spd:105,height:17,weight:950,baseExp:175},
+  {id:79,name:'slowpoke',types:['water','psychic'],hp:90,atk:65,def:65,spd:15,height:12,weight:360,baseExp:63},
+  {id:80,name:'slowbro',types:['water','psychic'],hp:95,atk:75,def:110,spd:30,height:16,weight:785,baseExp:172},
+  {id:81,name:'magnemite',types:['electric','steel'],hp:25,atk:35,def:70,spd:45,height:3,weight:60,baseExp:65},
+  {id:82,name:'magneton',types:['electric','steel'],hp:50,atk:60,def:95,spd:70,height:10,weight:600,baseExp:163},
+  {id:83,name:'farfetchd',types:['normal','flying'],hp:52,atk:65,def:55,spd:60,height:8,weight:150,baseExp:132},
+  {id:84,name:'doduo',types:['normal','flying'],hp:35,atk:85,def:45,spd:75,height:14,weight:392,baseExp:62},
+  {id:85,name:'dodrio',types:['normal','flying'],hp:60,atk:110,def:70,spd:100,height:18,weight:852,baseExp:165},
+  {id:86,name:'seel',types:['water'],hp:65,atk:45,def:55,spd:45,height:11,weight:900,baseExp:65},
+  {id:87,name:'dewgong',types:['water','ice'],hp:90,atk:70,def:80,spd:70,height:17,weight:1200,baseExp:166},
+  {id:88,name:'grimer',types:['poison'],hp:80,atk:80,def:50,spd:25,height:9,weight:300,baseExp:65},
+  {id:89,name:'muk',types:['poison'],hp:105,atk:105,def:75,spd:50,height:12,weight:300,baseExp:175},
+  {id:90,name:'shellder',types:['water'],hp:30,atk:65,def:100,spd:40,height:3,weight:40,baseExp:61},
+  {id:91,name:'cloyster',types:['water','ice'],hp:50,atk:95,def:180,spd:70,height:15,weight:1325,baseExp:184},
+  {id:92,name:'gastly',types:['ghost','poison'],hp:30,atk:35,def:30,spd:80,height:13,weight:1,baseExp:62},
+  {id:93,name:'haunter',types:['ghost','poison'],hp:45,atk:50,def:45,spd:95,height:16,weight:1,baseExp:142},
+  {id:94,name:'gengar',types:['ghost','poison'],hp:60,atk:65,def:60,spd:110,height:15,weight:405,baseExp:225},
+  {id:95,name:'onix',types:['rock','ground'],hp:35,atk:45,def:160,spd:70,height:88,weight:2100,baseExp:77},
+  {id:96,name:'drowzee',types:['psychic'],hp:60,atk:48,def:45,spd:42,height:10,weight:324,baseExp:66},
+  {id:97,name:'hypno',types:['psychic'],hp:85,atk:73,def:70,spd:67,height:16,weight:756,baseExp:169},
+  {id:98,name:'krabby',types:['water'],hp:30,atk:105,def:90,spd:50,height:4,weight:65,baseExp:65},
+  {id:99,name:'kingler',types:['water'],hp:55,atk:130,def:115,spd:75,height:13,weight:600,baseExp:166},
+  {id:100,name:'voltorb',types:['electric'],hp:40,atk:30,def:50,spd:100,height:5,weight:104,baseExp:66},
+  {id:101,name:'electrode',types:['electric'],hp:60,atk:50,def:70,spd:140,height:12,weight:666,baseExp:172},
+  {id:102,name:'exeggcute',types:['grass','psychic'],hp:60,atk:40,def:80,spd:40,height:4,weight:25,baseExp:65},
+  {id:103,name:'exeggutor',types:['grass','psychic'],hp:95,atk:95,def:85,spd:55,height:20,weight:1200,baseExp:182},
+  {id:104,name:'cubone',types:['ground'],hp:50,atk:50,def:95,spd:35,height:4,weight:65,baseExp:64},
+  {id:105,name:'marowak',types:['ground'],hp:60,atk:80,def:110,spd:45,height:10,weight:450,baseExp:149},
+  {id:106,name:'hitmonlee',types:['fighting'],hp:50,atk:120,def:53,spd:87,height:15,weight:498,baseExp:159},
+  {id:107,name:'hitmonchan',types:['fighting'],hp:50,atk:105,def:79,spd:76,height:14,weight:502,baseExp:159},
+  {id:108,name:'lickitung',types:['normal'],hp:90,atk:55,def:75,spd:30,height:12,weight:655,baseExp:77},
+  {id:109,name:'koffing',types:['poison'],hp:40,atk:65,def:95,spd:35,height:6,weight:10,baseExp:68},
+  {id:110,name:'weezing',types:['poison'],hp:65,atk:90,def:120,spd:60,height:12,weight:95,baseExp:172},
+  {id:111,name:'rhyhorn',types:['ground','rock'],hp:80,atk:85,def:95,spd:25,height:10,weight:1150,baseExp:69},
+  {id:112,name:'rhydon',types:['ground','rock'],hp:105,atk:130,def:120,spd:40,height:19,weight:1200,baseExp:170},
+  {id:113,name:'chansey',types:['normal'],hp:250,atk:5,def:5,spd:50,height:11,weight:346,baseExp:395},
+  {id:114,name:'tangela',types:['grass'],hp:65,atk:55,def:115,spd:60,height:10,weight:350,baseExp:87},
+  {id:115,name:'kangaskhan',types:['normal'],hp:105,atk:95,def:80,spd:90,height:22,weight:800,baseExp:172},
+  {id:116,name:'horsea',types:['water'],hp:30,atk:40,def:70,spd:60,height:4,weight:80,baseExp:59},
+  {id:117,name:'seadra',types:['water'],hp:55,atk:65,def:95,spd:85,height:12,weight:250,baseExp:154},
+  {id:118,name:'goldeen',types:['water'],hp:45,atk:67,def:60,spd:63,height:6,weight:150,baseExp:64},
+  {id:119,name:'seaking',types:['water'],hp:80,atk:92,def:65,spd:68,height:13,weight:390,baseExp:158},
+  {id:120,name:'staryu',types:['water'],hp:30,atk:45,def:55,spd:85,height:8,weight:345,baseExp:68},
+  {id:121,name:'starmie',types:['water','psychic'],hp:60,atk:75,def:85,spd:115,height:11,weight:800,baseExp:182},
+  {id:122,name:'mr-mime',types:['psychic','fairy'],hp:40,atk:45,def:65,spd:90,height:13,weight:545,baseExp:161},
+  {id:123,name:'scyther',types:['bug','flying'],hp:70,atk:110,def:80,spd:105,height:15,weight:560,baseExp:100},
+  {id:124,name:'jynx',types:['ice','psychic'],hp:65,atk:50,def:35,spd:95,height:14,weight:406,baseExp:159},
+  {id:125,name:'electabuzz',types:['electric'],hp:65,atk:83,def:57,spd:105,height:11,weight:300,baseExp:172},
+  {id:126,name:'magmar',types:['fire'],hp:65,atk:95,def:57,spd:93,height:13,weight:445,baseExp:173},
+  {id:127,name:'pinsir',types:['bug'],hp:65,atk:125,def:100,spd:85,height:15,weight:550,baseExp:175},
+  {id:128,name:'tauros',types:['normal'],hp:75,atk:100,def:95,spd:110,height:14,weight:884,baseExp:172},
+  {id:129,name:'magikarp',types:['water'],hp:20,atk:10,def:55,spd:80,height:9,weight:100,baseExp:40},
+  {id:130,name:'gyarados',types:['water','flying'],hp:95,atk:125,def:79,spd:81,height:65,weight:2350,baseExp:189},
+  {id:131,name:'lapras',types:['water','ice'],hp:130,atk:85,def:80,spd:60,height:25,weight:2200,baseExp:187},
+  {id:132,name:'ditto',types:['normal'],hp:48,atk:48,def:48,spd:48,height:3,weight:40,baseExp:101},
+  {id:133,name:'eevee',types:['normal'],hp:55,atk:55,def:50,spd:55,height:3,weight:65,baseExp:65},
+  {id:134,name:'vaporeon',types:['water'],hp:130,atk:65,def:60,spd:65,height:10,weight:290,baseExp:184},
+  {id:135,name:'jolteon',types:['electric'],hp:65,atk:65,def:60,spd:130,height:8,weight:245,baseExp:184},
+  {id:136,name:'flareon',types:['fire'],hp:65,atk:130,def:60,spd:65,height:9,weight:250,baseExp:184},
+  {id:137,name:'porygon',types:['normal'],hp:65,atk:60,def:70,spd:40,height:8,weight:365,baseExp:79},
+  {id:138,name:'omanyte',types:['rock','water'],hp:35,atk:40,def:100,spd:35,height:4,weight:75,baseExp:71},
+  {id:139,name:'omastar',types:['rock','water'],hp:70,atk:60,def:125,spd:55,height:10,weight:350,baseExp:173},
+  {id:140,name:'kabuto',types:['rock','water'],hp:30,atk:80,def:90,spd:55,height:5,weight:115,baseExp:71},
+  {id:141,name:'kabutops',types:['rock','water'],hp:60,atk:115,def:105,spd:80,height:13,weight:405,baseExp:173},
+  {id:142,name:'aerodactyl',types:['rock','flying'],hp:80,atk:105,def:65,spd:130,height:18,weight:590,baseExp:180},
+  {id:143,name:'snorlax',types:['normal'],hp:160,atk:110,def:65,spd:30,height:21,weight:4600,baseExp:189},
+  {id:144,name:'articuno',types:['ice','flying'],hp:90,atk:85,def:100,spd:85,height:17,weight:554,baseExp:261},
+  {id:145,name:'zapdos',types:['electric','flying'],hp:90,atk:90,def:85,spd:100,height:16,weight:526,baseExp:261},
+  {id:146,name:'moltres',types:['fire','flying'],hp:90,atk:100,def:90,spd:90,height:20,weight:600,baseExp:261},
+  {id:147,name:'dratini',types:['dragon'],hp:41,atk:64,def:45,spd:50,height:18,weight:33,baseExp:60},
+  {id:148,name:'dragonair',types:['dragon'],hp:61,atk:84,def:65,spd:70,height:40,weight:165,baseExp:147},
+  {id:149,name:'dragonite',types:['dragon','flying'],hp:91,atk:134,def:95,spd:80,height:22,weight:2100,baseExp:270},
+  {id:150,name:'mewtwo',types:['psychic'],hp:106,atk:110,def:90,spd:130,height:20,weight:1220,baseExp:306},
+];
+
+// ===== FETCH POKEMON =====
+function fetchPokemon(){
+  try {
+    allCards = POKEMON_RAW.map(p => {
+      const isLegendary = p.baseExp > 250;
+      const rarity = getRarity(p.baseExp || 100, isLegendary);
+      return {
+        id: p.id,
+        name: p.name,
+        img: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/other/official-artwork/${p.id}.png`,
+        types: p.types,
+        hp: p.hp,
+        atk: p.atk,
+        def: p.def,
+        spd: p.spd,
+        height: p.height,
+        weight: p.weight,
+        rarity,
+        price: PRICES[rarity],
+        baseExp: p.baseExp
+      };
+    });
+    filteredCards = [...allCards];
+    renderCards();
+  } catch(e) {
+    document.getElementById('card-grid').innerHTML = `<p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:3rem">⚠️ Gagal memuat data.</p>`;
+  }
+}
+
+// ===== RENDER CARDS =====
+function renderCards(){
+  const grid = document.getElementById('card-grid');
+  const slice = filteredCards.slice(0, offset + PAGE_SIZE);
+  grid.innerHTML = slice.length ? slice.map(c => cardHTML(c)).join('') : `<p style="color:var(--muted);grid-column:1/-1;text-align:center;padding:3rem">Pokémon tidak ditemukan 😢</p>`;
+  const btn = document.getElementById('load-more-btn');
+  btn.style.display = filteredCards.length > offset + PAGE_SIZE ? 'inline-block' : 'none';
+}
+
+function cardImg(c){
+  const col  = typeColor(c.types[0]);
+  const col2 = c.types[1] ? typeColor(c.types[1]) : col;
+  // Sprite URL — small pixel art, very fast to load, reliable CDN
+  const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${c.id}.png`;
+  const num = String(c.id).padStart(3,'0');
+  return `<div style="
+    width:68px;height:88px;border-radius:6px;overflow:hidden;position:relative;
+    background:linear-gradient(160deg,${col} 0%,${col2} 55%,#0a0a1a 100%);
+    box-shadow:2px 4px 14px rgba(0,0,0,.55);flex-shrink:0;
+  ">
+    <!-- shine overlay -->
+    <div style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,.18) 0%,transparent 55%);z-index:2;pointer-events:none"></div>
+    <!-- number -->
+    <div style="position:absolute;top:4px;left:5px;font-size:7px;font-weight:700;color:rgba(255,255,255,.8);font-family:monospace;z-index:3">#${num}</div>
+    <!-- pokemon sprite -->
+    <img src="${sprite}" alt="${c.name}"
+      style="position:absolute;bottom:14px;left:50%;transform:translateX(-50%);width:54px;height:54px;object-fit:contain;image-rendering:pixelated;z-index:3;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))"
+      onerror="this.style.display='none'">
+    <!-- name bar -->
+    <div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.6);text-align:center;font-size:6.5px;font-weight:800;color:white;padding:3px 2px;letter-spacing:.5px;font-family:monospace;z-index:3">${c.name.toUpperCase().slice(0,9)}</div>
+  </div>`;
+}
+
+function cardHTML(c){
+  return `
+    <div class="poke-card" onclick="openDetail(${c.id})">
+      ${cardImg(c)}
+      <div class="poke-card-body">
+        <span class="rarity-badge rarity-${c.rarity}">${getRarityLabel(c.rarity)}</span>
+        <div class="poke-name">${c.name.charAt(0).toUpperCase()+c.name.slice(1)}</div>
+        <div class="poke-types">${c.types.map(t=>`<span class="poke-type type-${t}">${t}</span>`).join('')}</div>
+        <div class="poke-footer">
+          <div>
+            <div class="poke-price">${fmt(c.price)}</div>
+            <div style="font-size:11px;color:var(--muted);margin-top:2px">HP ${c.hp} · ATK ${c.atk} · DEF ${c.def}</div>
+          </div>
+          <button class="add-btn" onclick="event.stopPropagation();addToCart(${c.id})">+ Beli</button>
+        </div>
+      </div>
+      <div class="poke-chevron">›</div>
+    </div>`;
+}
+
+function typeColor(t){
+  const m={fire:'#FF6B35',water:'#42A5F5',grass:'#66BB6A',electric:'#FFD700',psychic:'#EC407A',normal:'#A5A5A5',fighting:'#C62828',poison:'#AB47BC',ground:'#D4A04A',flying:'#90CAF9',bug:'#8BC34A',rock:'#78909C',ghost:'#5C6BC0',dragon:'#3F51B5',dark:'#424242',steel:'#90A4AE',ice:'#80DEEA',fairy:'#F48FB1'};
+  return m[t]||'#888';
+}
+
+// ===== FILTER & SEARCH =====
+window.filterCards = function(type, btn){
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('search-input').value = '';
+  filteredCards = type==='all' ? [...allCards] : allCards.filter(c=>c.types.includes(type));
+  offset = 0;
+  renderCards();
+};
+
+window.searchCards = function(q){
+  const query = q.toLowerCase().trim();
+  filteredCards = query ? allCards.filter(c=>c.name.includes(query)||String(c.id).includes(query)) : [...allCards];
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelector('.filter-btn').classList.add('active');
+  offset = 0;
+  renderCards();
+};
+
+window.loadMore = function(){
+  offset += PAGE_SIZE;
+  renderCards();
+};
+
+// ===== DETAIL =====
+window.openDetail = function(id){
+  const c = allCards.find(x=>x.id===id);
+  if(!c) return;
+  const statBar = (val,max,color) => `<div style="background:rgba(255,255,255,.1);border-radius:4px;height:8px;overflow:hidden"><div style="width:${Math.min(val/max*100,100)}%;height:100%;background:${color};border-radius:4px;transition:width .5s"></div></div>`;
+  document.getElementById('detail-modal-content').innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <div style="font-family:'Press Start 2P',monospace;font-size:12px;color:var(--yellow)">#${String(c.id).padStart(3,'0')}</div>
+      <button class="close-btn" onclick="closeModal('detail-modal')">✕</button>
+    </div>
+    <div style="background:linear-gradient(135deg,${typeColor(c.types[0])}44,${typeColor(c.types[0])}11);border-radius:16px;padding:1.5rem;text-align:center;margin-bottom:1.25rem">
+      <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/other/official-artwork/${c.id}.png"
+        alt="${c.name}"
+        style="width:160px;height:160px;object-fit:contain;image-rendering:auto;filter:drop-shadow(0 8px 20px rgba(0,0,0,.5))"
+        onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${c.id}.png'">
+    </div>
+    <h3 style="font-family:'Press Start 2P',monospace;font-size:16px;margin-bottom:.5rem">${c.name.toUpperCase()}</h3>
+    <div style="display:flex;gap:.5rem;margin-bottom:1.25rem">${c.types.map(t=>`<span class="poke-type type-${t}">${t}</span>`).join('')}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem">
+      ${[['HP',c.hp,255,'#F44336'],['Attack',c.atk,190,'#FF9800'],['Defense',c.def,230,'#2196F3'],['Speed',c.spd,200,'#4CAF50']].map(([l,v,m,col])=>`
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:4px"><span style="color:var(--muted)">${l}</span><span>${v}</span></div>
+          ${statBar(v,m,col)}
+        </div>`).join('')}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1.5rem;font-size:13px;font-weight:700">
+      <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:.75rem;text-align:center"><div style="color:var(--muted);font-size:11px;margin-bottom:.25rem">Tinggi</div>${c.height/10}m</div>
+      <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:.75rem;text-align:center"><div style="color:var(--muted);font-size:11px;margin-bottom:.25rem">Berat</div>${c.weight/10}kg</div>
+      <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:.75rem;text-align:center"><div style="color:var(--muted);font-size:11px;margin-bottom:.25rem">Rarity</div><span class="rarity-${c.rarity}" style="font-size:11px;padding:2px 8px;border-radius:8px">${getRarityLabel(c.rarity)}</span></div>
+      <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:.75rem;text-align:center"><div style="color:var(--muted);font-size:11px;margin-bottom:.25rem">Base EXP</div>${c.baseExp}</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem;background:rgba(255,215,0,.05);border:1px solid rgba(255,215,0,.2);border-radius:12px">
+      <span style="font-family:'Press Start 2P',monospace;font-size:16px;color:var(--yellow)">${fmt(c.price)}</span>
+      <button class="add-btn" style="padding:10px 20px;font-size:13px" onclick="addToCart(${c.id});closeModal('detail-modal')">+ Tambah ke Keranjang</button>
+    </div>
+  `;
+  document.getElementById('detail-modal').classList.add('show');
+};
+
+// ===== CART =====
+window.addToCart = function(id){
+  const c = allCards.find(x=>x.id===id);
+  const ex = cart.find(x=>x.id===id);
+  if(ex) ex.qty++;
+  else cart.push({...c,qty:1});
+  updateCartCount();
+  showToast(`${c.name.toUpperCase()} ditambahkan!`);
+};
+
+function updateCartCount(){ document.getElementById('cart-count').textContent=cart.reduce((s,i)=>s+i.qty,0); }
+
+function renderCart(){
+  const body=document.getElementById('cart-body'), footer=document.getElementById('cart-footer');
+  if(!cart.length){ body.innerHTML=`<div class="empty-cart"><div class="empty-icon">🃏</div><p style="font-weight:700">Belum ada kartu di keranjang</p></div>`; footer.innerHTML=''; return; }
+  body.innerHTML=cart.map(item=>`
+    <div class="cart-item">
+      <div class="cart-thumb" style="overflow:hidden;background:linear-gradient(135deg,${typeColor(item.types[0])}88,#0a0a1a);display:flex;align-items:center;justify-content:center">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.id}.png" style="width:48px;height:48px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none'">
+      </div>
+      <div class="cart-item-info">
+        <div class="cart-item-name">${item.name.toUpperCase()}</div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:.25rem">${item.types.map(t=>`<span class="poke-type type-${t}" style="font-size:9px;padding:2px 6px">${t}</span>`).join(' ')}</div>
+        <div class="cart-item-controls">
+          <button class="qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+          <span class="qty-num">${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty(${item.id},1)">+</button>
+          <span class="cart-item-price">${fmt(item.price*item.qty)}</span>
+          <button class="remove-item" onclick="removeFromCart(${item.id})">🗑</button>
+        </div>
+      </div>
+    </div>`).join('');
+  const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  footer.innerHTML=`
+    <div class="total-row"><span class="total-label">Subtotal</span><span style="font-weight:700">${fmt(sub)}</span></div>
+    <div class="total-row"><span class="total-label">Ongkir</span><span style="font-weight:700;color:var(--muted)">${fmt(20000)}</span></div>
+    <div class="total-row" style="border-top:1px solid rgba(255,255,255,.07);padding-top:.75rem;margin-top:.25rem">
+      <span class="total-label" style="color:var(--white);font-size:15px">Total</span>
+      <span class="total-value">${fmt(sub+20000)}</span>
+    </div>
+    <button class="checkout-btn" onclick="openCheckout()">⚡ Checkout Sekarang</button>`;
+}
+
+window.changeQty = function(id,d){
+  const item=cart.find(x=>x.id===id); if(!item)return;
+  item.qty+=d; if(item.qty<=0) cart=cart.filter(x=>x.id!==id);
+  updateCartCount(); renderCart();
+};
+window.removeFromCart = function(id){ cart=cart.filter(x=>x.id!==id); updateCartCount(); renderCart(); };
+window.toggleCart = function(){
+  renderCart();
+  document.getElementById('cart-panel').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+};
+window.closeAll = function(){
+  document.getElementById('cart-panel').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+};
+
+// ===== CHECKOUT =====
+window.openCheckout = function(){
+  if(!cart.length) return;
+  const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  document.getElementById('checkout-summary').innerHTML=`
+    <div class="order-summary-title">Ringkasan Pesanan</div>
+    ${cart.map(i=>`<div class="summary-item"><span>${i.name.toUpperCase()} ×${i.qty}</span><span>${fmt(i.price*i.qty)}</span></div>`).join('')}
+    <div class="summary-total"><span>Total</span><span>${fmt(sub+20000)}</span></div>`;
+  closeAll();
+  document.getElementById('checkout-modal').classList.add('show');
+};
+
+window.placeOrder = async function(){
+  const name=document.getElementById('cust-name').value.trim();
+  const phone=document.getElementById('cust-phone').value.trim();
+  const email=document.getElementById('cust-email').value.trim();
+  const address=document.getElementById('cust-address').value.trim();
+  const payment=document.getElementById('payment-method').value;
+  const shipping=document.getElementById('shipping-method').value;
+  if(!name||!phone||!address||!payment){ showToast('Lengkapi semua data!'); return; }
+  const orderId=genId();
+  const sub=cart.reduce((s,i)=>s+i.price*i.qty,0);
+  showLoading('Menyimpan pesanan...');
+  try {
+    const {error:oe}=await supabase.from('poke_orders').insert([{id:orderId,customer_name:name,customer_phone:phone,customer_email:email||null,customer_address:address,payment_method:payment,shipping_method:shipping,subtotal:sub,total:sub+20000,status:'Diproses'}]);
+    if(oe) throw oe;
+    const {error:ie}=await supabase.from('poke_order_items').insert(cart.map(item=>({order_id:orderId,pokemon_id:item.id,pokemon_name:item.name,types:item.types.join(','),price:item.price,qty:item.qty,img:item.img,rarity:item.rarity})));
+    if(ie) throw ie;
+    cart=[]; updateCartCount(); hideLoading();
+    closeModal('checkout-modal');
+    document.getElementById('success-order-id').textContent='ID: '+orderId;
+    document.getElementById('success-modal').classList.add('show');
+    ['cust-name','cust-phone','cust-email','cust-address'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('payment-method').selectedIndex=0;
+  } catch(err){ hideLoading(); console.error(err); showToast('Gagal: '+err.message); }
+};
+
+// ===== RIWAYAT =====
+async function renderHistory(){
+  const cont=document.getElementById('history-content');
+  cont.innerHTML=`<div style="text-align:center;padding:3rem;color:var(--muted)">⏳ Memuat...</div>`;
+  try {
+    const {data,error}=await supabase.from('poke_orders').select('*').order('created_at',{ascending:false});
+    if(error) throw error;
+    orders=data||[];
+    if(!orders.length){ cont.innerHTML=`<div style="text-align:center;padding:4rem;color:var(--muted)"><div style="font-size:48px;margin-bottom:1rem">🃏</div><p style="font-weight:700">Belum ada pesanan</p><button onclick="showPage('shop')" style="margin-top:1.5rem;padding:12px 24px;background:linear-gradient(90deg,var(--red),var(--red2));color:var(--white);border:none;border-radius:25px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif">Belanja Sekarang</button></div>`; return; }
+    const sc={Diproses:'processing',Dikirim:'shipped',Terkirim:'delivered',Dibatalkan:'cancelled'};
+    cont.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+      <thead><tr style="background:var(--dark3)">${['ID','Tanggal','Nama','Total','Status'].map(h=>`<th style="padding:12px 16px;text-align:left;font-size:12px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">${h}</th>`).join('')}</tr></thead>
+      <tbody>${orders.map(o=>`<tr style="border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .2s" onmouseover="this.style.background='rgba(255,215,0,.04)'" onmouseout="this.style.background=''" onclick="viewDetail('${o.id}')">
+        <td style="padding:14px 16px;color:var(--yellow);font-weight:700;font-size:13px">${o.id}</td>
+        <td style="padding:14px 16px;color:var(--muted);font-size:13px">${new Date(o.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}</td>
+        <td style="padding:14px 16px;font-size:13px;font-weight:700">${o.customer_name}</td>
+        <td style="padding:14px 16px;color:var(--yellow);font-weight:800">${fmt(o.total)}</td>
+        <td style="padding:14px 16px"><span style="padding:4px 12px;border-radius:20px;font-size:11px;font-weight:800;background:${o.status==='Terkirim'?'rgba(67,160,71,.2)':o.status==='Dikirim'?'rgba(66,165,245,.2)':'rgba(255,215,0,.15)'};color:${o.status==='Terkirim'?'#66BB6A':o.status==='Dikirim'?'#42A5F5':'var(--yellow)'}">${o.status}</span></td>
+      </tr>`).join('')}</tbody>
+    </table></div>`;
+  } catch(err){ cont.innerHTML=`<p style="color:var(--muted);text-align:center;padding:3rem">⚠️ ${err.message}</p>`; }
+}
+
+window.viewDetail = async function(id){
+  const o=orders.find(x=>x.id===id); if(!o)return;
+  showLoading('Memuat detail...');
+  const {data:items,error}=await supabase.from('poke_order_items').select('*').eq('order_id',id);
+  hideLoading();
+  if(error){ showToast('Gagal memuat detail'); return; }
+  document.getElementById('detail-modal-content').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h3 style="font-family:'Press Start 2P',monospace;font-size:12px;color:var(--yellow)">DETAIL PESANAN</h3>
+      <button class="close-btn" onclick="closeModal('detail-modal')">✕</button>
+    </div>
+    <div style="background:var(--dark3);border-radius:12px;padding:1rem;margin-bottom:1rem">
+      <div style="color:var(--yellow);font-weight:800;margin-bottom:.5rem">${o.id}</div>
+      <div style="font-size:13px;color:var(--muted)">${new Date(o.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'})}</div>
+    </div>
+    <div style="margin-bottom:1rem">
+      ${(items||[]).map(item=>`
+        <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="width:52px;height:52px;background:rgba(255,255,255,.07);border-radius:8px;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${item.pokemon_id}.png" style="width:46px;height:46px;object-fit:contain;image-rendering:pixelated" onerror="this.style.display='none'">
+          </div>
+          <div style="flex:1">
+            <div style="font-size:12px;font-weight:800;font-family:'Press Start 2P',monospace;line-height:1.4">${item.pokemon_name.toUpperCase()}</div>
+            <div style="font-size:11px;color:var(--muted)">Qty: ${item.qty} × ${fmt(item.price)}</div>
+          </div>
+          <div style="color:var(--yellow);font-weight:800;font-size:13px">${fmt(item.price*item.qty)}</div>
+        </div>`).join('')}
+    </div>
+    <div style="border-top:1px solid rgba(255,255,255,.07);padding-top:1rem">
+      <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:13px"><span style="color:var(--muted)">Subtotal</span><span>${fmt(o.subtotal)}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:.4rem;font-size:13px"><span style="color:var(--muted)">Ongkir</span><span>${fmt(20000)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800;color:var(--yellow);margin-top:.5rem"><span>Total</span><span>${fmt(o.total)}</span></div>
+    </div>`;
+  document.getElementById('detail-modal').classList.add('show');
+};
+
+// ===== NAV =====
+window.showPage = function(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  const el=document.getElementById('nav-'+name); if(el) el.classList.add('active');
+  if(name==='history') renderHistory();
+  window.scrollTo(0,0);
+};
+
+window.closeModal = function(id){ document.getElementById(id).classList.remove('show'); };
+window.showToast = function(msg){
+  const t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800);
+};
+
+// ===== INIT =====
+fetchPokemon();
+
+</script>
+</body>
+</html>
